@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จองคิว | The Gentleman's Cut</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Segoe UI', 'Noto Sans Thai', sans-serif; }
+  .step-panel { transition: opacity 0.3s ease, transform 0.3s ease; }
+  .fade-enter { opacity: 0; transform: translateX(12px); }
+</style>
+</head>
+<body class="bg-amber-50 text-stone-800 min-h-screen flex flex-col">
+
+  <header class="bg-stone-800 text-amber-50 py-5 shadow-md">
+    <div class="max-w-2xl mx-auto px-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-bold tracking-wide">The Gentleman's Cut</h1>
+        <p class="text-amber-200 text-sm">ระบบจองคิวตัดผมออนไลน์</p>
+      </div>
+      <span class="text-3xl">✂️</span>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-2xl w-full mx-auto px-4 py-8">
+
+    <!-- Step Indicator -->
+    <div class="flex items-center justify-center mb-8" id="stepIndicator">
+      <div class="flex items-center" data-step="1">
+        <div class="step-circle w-9 h-9 rounded-full flex items-center justify-center font-semibold border-2"></div>
+        <span class="step-label ml-2 text-sm font-medium"></span>
+      </div>
+      <div class="w-10 h-0.5 mx-2 bg-stone-300 step-line" data-line="1"></div>
+      <div class="flex items-center" data-step="2">
+        <div class="step-circle w-9 h-9 rounded-full flex items-center justify-center font-semibold border-2"></div>
+        <span class="step-label ml-2 text-sm font-medium"></span>
+      </div>
+      <div class="w-10 h-0.5 mx-2 bg-stone-300 step-line" data-line="2"></div>
+      <div class="flex items-center" data-step="3">
+        <div class="step-circle w-9 h-9 rounded-full flex items-center justify-center font-semibold border-2"></div>
+        <span class="step-label ml-2 text-sm font-medium"></span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 min-h-[420px]">
+
+      <!-- STEP 1: เลือกวัน-เวลา -->
+      <section id="panel-1" class="step-panel">
+        <h2 class="text-lg font-bold mb-1">เลือกวันและเวลาที่สะดวก</h2>
+        <p class="text-stone-500 text-sm mb-5">กรุณาเลือกวันที่และช่วงเวลาที่ต้องการเข้ารับบริการ</p>
+
+        <p class="text-sm font-semibold text-stone-600 mb-2">วันที่</p>
+        <div id="dateGrid" class="grid grid-cols-4 sm:grid-cols-7 gap-2 mb-6"></div>
+
+        <div id="timeSection" class="hidden">
+          <p class="text-sm font-semibold text-stone-600 mb-2">ช่วงเวลา</p>
+          <div id="timeGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
+        </div>
+
+        <div class="flex justify-end mt-8">
+          <button id="toStep2" disabled
+            class="px-6 py-2.5 rounded-lg font-semibold bg-stone-300 text-stone-500 cursor-not-allowed transition">
+            ถัดไป
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 2: กรอกชื่อ-เบอร์โทร -->
+      <section id="panel-2" class="step-panel hidden">
+        <h2 class="text-lg font-bold mb-1">ข้อมูลผู้จอง</h2>
+        <p class="text-stone-500 text-sm mb-5">กรุณากรอกชื่อและเบอร์โทรศัพท์เพื่อติดต่อยืนยันการจอง</p>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-stone-600 mb-1">ชื่อ-นามสกุล</label>
+            <input id="custName" type="text" placeholder="เช่น สมชาย ใจดี"
+              class="w-full border border-stone-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-600">
+            <p id="nameError" class="text-red-600 text-xs mt-1 hidden">กรุณากรอกชื่อ-นามสกุล</p>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-stone-600 mb-1">เบอร์โทรศัพท์</label>
+            <input id="custPhone" type="tel" placeholder="เช่น 0812345678" maxlength="10"
+              class="w-full border border-stone-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-600">
+            <p id="phoneError" class="text-red-600 text-xs mt-1 hidden">กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (9-10 หลัก)</p>
+          </div>
+        </div>
+
+        <div class="flex justify-between mt-8">
+          <button onclick="goToStep(1)" class="px-6 py-2.5 rounded-lg font-semibold border border-stone-300 text-stone-600 hover:bg-stone-100 transition">ย้อนกลับ</button>
+          <button id="toStep3" onclick="handleStep2Next()" class="px-6 py-2.5 rounded-lg font-semibold bg-amber-700 text-white hover:bg-amber-800 transition">ถัดไป</button>
+        </div>
+      </section>
+
+      <!-- STEP 3: ยืนยันการจอง -->
+      <section id="panel-3" class="step-panel hidden">
+        <div id="confirmView">
+          <h2 class="text-lg font-bold mb-1">ยืนยันการจอง</h2>
+          <p class="text-stone-500 text-sm mb-5">กรุณาตรวจสอบข้อมูลก่อนยืนยันการจองคิว</p>
+
+          <div class="bg-amber-50 rounded-xl p-5 space-y-3 border border-amber-200">
+            <div class="flex justify-between">
+              <span class="text-stone-500 text-sm">วันที่</span>
+              <span id="sumDate" class="font-semibold"></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-stone-500 text-sm">เวลา</span>
+              <span id="sumTime" class="font-semibold"></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-stone-500 text-sm">ชื่อผู้จอง</span>
+              <span id="sumName" class="font-semibold"></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-stone-500 text-sm">เบอร์โทร</span>
+              <span id="sumPhone" class="font-semibold"></span>
+            </div>
+          </div>
+
+          <div class="flex justify-between mt-8">
+            <button onclick="goToStep(2)" class="px-6 py-2.5 rounded-lg font-semibold border border-stone-300 text-stone-600 hover:bg-stone-100 transition">ย้อนกลับ</button>
+            <button onclick="confirmBooking()" class="px-6 py-2.5 rounded-lg font-semibold bg-amber-700 text-white hover:bg-amber-800 transition">ยืนยันการจอง</button>
+          </div>
+        </div>
+
+        <div id="successView" class="hidden text-center py-6">
+          <div class="text-6xl mb-4">✅</div>
+          <h2 class="text-xl font-bold mb-2">จองคิวสำเร็จ!</h2>
+          <p class="text-stone-500 mb-5">ขอบคุณที่ใช้บริการ เราจะติดต่อยืนยันอีกครั้งก่อนถึงวันนัด</p>
+          <div class="bg-stone-100 rounded-xl p-4 inline-block">
+            <p class="text-stone-500 text-sm">หมายเลขการจอง</p>
+            <p id="bookingRef" class="text-2xl font-bold text-amber-700 tracking-wider"></p>
+          </div>
+          <div class="mt-8">
+            <button onclick="resetBooking()" class="px-6 py-2.5 rounded-lg font-semibold bg-amber-700 text-white hover:bg-amber-800 transition">จองคิวใหม่</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="bg-stone-800 text-amber-100 text-sm py-4 text-center">
+    <p>The Gentleman's Cut · 88 ถนนสุขุมวิท กรุงเทพฯ · เปิดทุกวัน 09:00 - 20:00 · โทร 02-123-4567</p>
+  </footer>
+
+<script>
+const state = { date: null, dateLabel: null, time: null, name: '', phone: '' };
+const STEP_LABELS = ['วัน-เวลา', 'ข้อมูลติดต่อ', 'ยืนยัน'];
+
+const thaiDays = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+const thaiMonths = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+function generateDates() {
+  const dates = [];
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+}
+
+function generateTimeSlots() {
+  const slots = [];
+  for (let h = 9; h <= 19; h++) {
+    slots.push(`${String(h).padStart(2,'0')}:00`);
+  }
+  // mock บาง slot เต็มแบบคงที่ตามตำแหน่ง เพื่อไม่ให้ผลลัพธ์เปลี่ยนทุกครั้งที่ render
+  const bookedIndexes = [1, 4, 7];
+  return slots.map((t, idx) => ({ time: t, full: bookedIndexes.includes(idx) }));
+}
+
+const dateList = generateDates();
+
+function renderDates() {
+  const grid = document.getElementById('dateGrid');
+  grid.innerHTML = '';
+  dateList.forEach((d, idx) => {
+    const iso = d.toISOString().slice(0,10);
+    const label = `${thaiDays[d.getDay()]} ${d.getDate()} ${thaiMonths[d.getMonth()]}`;
+    const btn = document.createElement('button');
+    btn.className = 'date-btn border rounded-lg py-2 px-1 text-xs sm:text-sm font-medium transition ' +
+      (state.date === iso ? 'bg-amber-700 text-white border-amber-700' : 'border-stone-300 hover:border-amber-600 text-stone-700');
+    btn.innerHTML = `<div>${thaiDays[d.getDay()]}</div><div class="font-bold">${d.getDate()}</div><div>${thaiMonths[d.getMonth()]}</div>`;
+    btn.onclick = () => selectDate(iso, label);
+    grid.appendChild(btn);
+  });
+}
+
+function selectDate(iso, label) {
+  state.date = iso;
+  state.dateLabel = label;
+  state.time = null;
+  document.getElementById('timeSection').classList.remove('hidden');
+  renderDates();
+  renderTimeSlots();
+  updateStep1Button();
+}
+
+function renderTimeSlots() {
+  const grid = document.getElementById('timeGrid');
+  grid.innerHTML = '';
+  generateTimeSlots().forEach(slot => {
+    const btn = document.createElement('button');
+    if (slot.full) {
+      btn.disabled = true;
+      btn.className = 'border rounded-lg py-2 text-sm font-medium bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed line-through';
+      btn.textContent = slot.time;
+    } else {
+      const selected = state.time === slot.time;
+      btn.className = 'border rounded-lg py-2 text-sm font-medium transition ' +
+        (selected ? 'bg-amber-700 text-white border-amber-700' : 'border-stone-300 hover:border-amber-600 text-stone-700');
+      btn.textContent = slot.time;
+      btn.onclick = () => { state.time = slot.time; renderTimeSlots(); updateStep1Button(); };
+    }
+    grid.appendChild(btn);
+  });
+}
+
+function updateStep1Button() {
+  const btn = document.getElementById('toStep2');
+  if (state.date && state.time) {
+    btn.disabled = false;
+    btn.className = 'px-6 py-2.5 rounded-lg font-semibold bg-amber-700 text-white hover:bg-amber-800 transition';
+    btn.onclick = () => goToStep(2);
+  } else {
+    btn.disabled = true;
+    btn.className = 'px-6 py-2.5 rounded-lg font-semibold bg-stone-300 text-stone-500 cursor-not-allowed transition';
+    btn.onclick = null;
+  }
+}
+
+function updateStepIndicator(step) {
+  document.querySelectorAll('#stepIndicator [data-step]').forEach(el => {
+    const n = Number(el.dataset.step);
+    const circle = el.querySelector('.step-circle');
+    const label = el.querySelector('.step-label');
+    label.textContent = STEP_LABELS[n-1];
+    if (n < step) {
+      circle.textContent = '✓';
+      circle.className = 'step-circle w-9 h-9 rounded-full flex items-center justify-center font-semibold border-2 bg-amber-700 border-amber-700 text-white';
+      label.className = 'step-label ml-2 text-sm font-medium text-amber-700';
+    } else if (n === step) {
+      circle.textContent = n;
+      circle.className = 'step-circle w-9 h-9 rounded-full flex items-center justify-center font-semibold border-2 bg-white border-amber-700 text-amber-700';
+      label.className = 'step-label ml-2 text-sm font-medium text-stone-800';
+    } else {
+      circle.textContent = n;
+      circle.className = 'step-circle w-9 h-9 rounded-full flex items-center justify-center font-semibold border-2 border-stone-300 text-stone-400';
+      label.className = 'step-label ml-2 text-sm font-medium text-stone-400';
+    }
+  });
+  document.querySelectorAll('.step-line').forEach(line => {
+    const n = Number(line.dataset.line);
+    line.className = 'w-10 h-0.5 mx-2 step-line ' + (n < step ? 'bg-amber-700' : 'bg-stone-300');
+  });
+}
+
+function goToStep(step) {
+  [1,2,3].forEach(n => {
+    document.getElementById(`panel-${n}`).classList.toggle('hidden', n !== step);
+  });
+  updateStepIndicator(step);
+  if (step === 3) renderSummary();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function handleStep2Next() {
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const nameError = document.getElementById('nameError');
+  const phoneError = document.getElementById('phoneError');
+
+  const nameValid = name.length > 0;
+  const phoneValid = /^[0-9]{9,10}$/.test(phone);
+
+  nameError.classList.toggle('hidden', nameValid);
+  phoneError.classList.toggle('hidden', phoneValid);
+
+  if (!nameValid || !phoneValid) return;
+
+  state.name = name;
+  state.phone = phone;
+  goToStep(3);
+}
+
+function renderSummary() {
+  document.getElementById('sumDate').textContent = state.dateLabel;
+  document.getElementById('sumTime').textContent = state.time + ' น.';
+  document.getElementById('sumName').textContent = state.name;
+  document.getElementById('sumPhone').textContent = state.phone;
+  document.getElementById('confirmView').classList.remove('hidden');
+  document.getElementById('successView').classList.add('hidden');
+}
+
+function confirmBooking() {
+  const ref = 'GC' + Math.floor(100000 + Math.random() * 900000);
+  document.getElementById('bookingRef').textContent = ref;
+  document.getElementById('confirmView').classList.add('hidden');
+  document.getElementById('successView').classList.remove('hidden');
+}
+
+function resetBooking() {
+  state.date = null;
+  state.dateLabel = null;
+  state.time = null;
+  state.name = '';
+  state.phone = '';
+  document.getElementById('custName').value = '';
+  document.getElementById('custPhone').value = '';
+  document.getElementById('nameError').classList.add('hidden');
+  document.getElementById('phoneError').classList.add('hidden');
+  document.getElementById('timeSection').classList.add('hidden');
+  updateStep1Button();
+  renderDates();
+  goToStep(1);
+}
+
+renderDates();
+updateStep1Button();
+updateStepIndicator(1);
+</script>
+
+</body>
+</html>
